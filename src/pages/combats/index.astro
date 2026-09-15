@@ -1,0 +1,11 @@
+---
+import Base from '../../layouts/Base.astro';
+import MatchupTable from '../../components/MatchupTable.astro';
+const title = 'Tous les combats humain vs animal';
+const description = 'Les 36 duels analysés : chaque profil humain face à chaque animal, avec le nombre nécessaire pour gagner et le bilan des pertes.';
+---
+<Base {title} {description}>
+  <h1>Tous les combats</h1>
+  <p class="lead">Chaque case renvoie vers l'analyse détaillée du duel.</p>
+  <MatchupTable />
+</Base>

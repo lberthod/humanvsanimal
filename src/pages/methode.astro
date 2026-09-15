@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+const title = 'Méthode : comment sont calculés les chiffres ?';
+const description = 'La logique derrière le simulateur humain vs animal : rapport de masse, temps d\'action libre, létalité par coup, précision des experts et effet des armes.';
+---
+<Base {title} {description} type="article">
+  <h1>Comment sont calculés les chiffres ?</h1>
+  <p class="lead">Aucune étude scientifique n'existe sur ce sujet, heureusement. Les estimations reposent sur cinq principes simples appliqués de manière cohérente à tous les duels.</p>
+  <h2>1. Le rapport de masse totale</h2>
+  <p>Pour écraser un animal au sol et annuler sa force explosive, il faut environ 10 à 15 fois son poids en masse humaine. Un chimpanzé de 50 kg exige 600 à 700 kg d'humains sur lui, un gorille de 180 kg plus de 2 tonnes.</p>
+  <h2>2. Le temps d'action libre</h2>
+  <p>Tant qu'il n'est pas submergé, l'animal neutralise un humain toutes les quelques secondes. Plus le groupe est nombreux par rapport au seuil, plus ce temps est court et plus les pertes baissent.</p>
+  <h2>3. La létalité par coup</h2>
+  <p>Chaque animal reçoit une note de 1 à 4. Un coup de loup blesse (1), un coup de chimpanzé mutile (2), une morsure de lion ou de crocodile tue souvent (3), un coup de gorille ou d'ours tue quasi systématiquement (4).</p>
+  <h2>4. La précision des experts</h2>
+  <p>Les combattants entraînés divisent le nombre nécessaire par 2 à 3. Ils gardent leur sang-froid, se coordonnent pour verrouiller les membres et frappent les zones vulnérables (yeux, gorge, nuque).</p>
+  <h2>5. Les armes</h2>
+  <p>Le couteau permet d'atteindre les organes vitaux sans dépendre de la masse, mais oblige à rester au contact. Le fusil d'assaut supprime le problème : la question n'est plus le nombre, mais de ne pas rater sa cible face à une charge.</p>
+  <h2>Les profils dits « impossibles »</h2>
+  <p>Pour des personnes âgées face à un lion, un gorille, un ours ou un crocodile, le nombre ne change rien : le groupe s'effondre (fractures, épuisement, panique) avant de pouvoir épuiser l'animal.</p>
+  <h2>La courbe de probabilité</h2>
+  <p>Le simulateur utilise une courbe logistique centrée sur le seuil de victoire de chaque duel. En dessous du seuil, la probabilité chute vite ; au-dessus, elle plafonne rapidement. Les pertes humaines sont proportionnelles à la létalité de l'animal et au temps d'action libre.</p>
+  <p class="note">Ce site est un exercice de pensée ludique. Ne tentez jamais d'approcher un animal sauvage.</p>
+</Base>

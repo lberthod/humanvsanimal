@@ -1,0 +1,31 @@
+---
+import { animals, profiles, getThreshold, formatThreshold, matchupSlug, type Range } from '../lib/model';
+function tagClass(t: Range): string {
+  if (t === null) return 'bad';
+  if (t[1] <= 3) return 'ok';
+  if (t[1] <= 30) return 'warn';
+  return 'bad';
+}
+---
+<div class="table-wrap">
+  <table>
+    <caption class="note" style="padding:8px">Nombre d'humains nécessaires pour une victoire quasi certaine (espace clos, animal adulte enragé). Cliquez sur une case pour l'analyse détaillée.</caption>
+    <thead>
+      <tr>
+        <th>Animal</th>
+        {profiles.map((p) => <th><a href={`/profils/${p.slug}/`}>{p.emoji} {p.shortName}</a></th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {animals.map((a) => (
+        <tr>
+          <td><a href={`/animaux/${a.slug}/`}>{a.emoji} {a.name}</a> <span class="note">({a.weight} kg)</span></td>
+          {profiles.map((p) => {
+            const t = getThreshold(a.slug, p.slug);
+            return <td><a href={`/combats/${matchupSlug(a, p)}/`}><span class={`tag ${tagClass(t)}`}>{formatThreshold(t)}</span></a></td>;
+          })}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

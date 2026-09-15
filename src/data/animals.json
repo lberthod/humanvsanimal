@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "loup",
+    "name": "Loup gris",
+    "weight": 45,
+    "lethality": 1,
+    "emoji": "🐺",
+    "description": "Prédateur de meute d'environ 45 kg. Seul, il est dangereux mais reste dans une catégorie de poids inférieure à l'humain adulte.",
+    "strengths": ["Morsure puissante (environ 400 PSI)", "Vitesse et endurance", "Instinct de chasse"],
+    "weaknesses": ["Léger et peu massif", "Fuit souvent face à un groupe", "Fragile au corps à corps"]
+  },
+  {
+    "slug": "chimpanze",
+    "name": "Chimpanzé",
+    "weight": 50,
+    "lethality": 2,
+    "emoji": "🐵",
+    "description": "Primate de 50 kg, environ 1,5 fois plus fort qu'un homme au kilo, avec des canines de 5 cm et une agressivité explosive.",
+    "strengths": ["Force explosive des bras", "Canines capables de sectionner une artère", "Cible les visages, doigts et parties génitales"],
+    "weaknesses": ["Léger : 50 kg", "Ne gère pas plusieurs attaquants simultanés", "Peut être écrasé au sol par la masse"]
+  },
+  {
+    "slug": "lion",
+    "name": "Lion",
+    "weight": 190,
+    "lethality": 3,
+    "emoji": "🦁",
+    "description": "Grand félin de 190 kg, prédateur spécialisé dans la mise à mort rapide par étranglement et morsure à la nuque.",
+    "strengths": ["Morsure à la nuque instantanément mortelle", "Griffes de 4 cm", "Vitesse de charge fulgurante"],
+    "weaknesses": ["Endurance limitée", "Ne peut mordre qu'une cible à la fois", "Vulnérable une fois plaqué au sol par la masse"]
+  },
+  {
+    "slug": "gorille",
+    "name": "Gorille dos argenté",
+    "weight": 180,
+    "lethality": 4,
+    "emoji": "🦍",
+    "description": "Mâle dominant de 140 à 200 kg de muscles. Morsure supérieure à celle d'un lion, structure osseuse quasi indestructible à mains nues.",
+    "strengths": ["Coups de bras capables de briser une colonne vertébrale", "Peau et muscles absorbant tous les coups humains", "Centre de gravité très bas"],
+    "weaknesses": ["Endurance cardiaque limitée", "Pas un prédateur : cherche à intimider avant de tuer", "Yeux et gorge exposés une fois immobilisé"]
+  },
+  {
+    "slug": "ours-brun",
+    "name": "Ours brun (grizzly)",
+    "weight": 300,
+    "lethality": 4,
+    "emoji": "🐻",
+    "description": "Omnivore de 300 kg, capable de tuer un humain d'un seul coup de patte et protégé par une épaisse couche de graisse et de fourrure.",
+    "strengths": ["Coups de patte mortels", "Couche de graisse et fourrure amortissant tout", "Peut courir à 50 km/h"],
+    "weaknesses": ["S'épuise sur la durée", "Museau et yeux sensibles", "Peut renoncer si la résistance est trop forte"]
+  },
+  {
+    "slug": "crocodile",
+    "name": "Crocodile du Nil (sur terre)",
+    "weight": 500,
+    "lethality": 3,
+    "emoji": "🐊",
+    "description": "Reptile blindé de 500 kg à la morsure la plus puissante du règne animal. Sur terre il est lent, dans l'eau il est invincible sans arme.",
+    "strengths": ["Morsure de 2 tonnes de pression", "Carapace d'écailles osseuses", "Coup de queue capable de briser des jambes"],
+    "weaknesses": ["Lent et peu endurant sur terre", "Peut être retourné et immobilisé", "Yeux et gorge sans protection"]
+  }
+]

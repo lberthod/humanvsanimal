@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import Simulator from '../components/Simulator.vue';
+const title = 'Simulateur de combat humain vs animal';
+const description = 'Simulateur interactif : choisissez un animal (gorille, chimpanzé, lion, ours, loup, crocodile), un profil humain et un nombre de combattants pour estimer l\'issue du combat et le bilan des pertes.';
+---
+<Base {title} {description} jsonLd={{ '@context': 'https://schema.org', '@type': 'WebApplication', name: title, applicationCategory: 'GameApplication', operatingSystem: 'Web', inLanguage: 'fr', url: Astro.url.href, description }}>
+  <h1>Simulateur de combat</h1>
+  <p class="lead">Réglez les paramètres, le résultat se met à jour instantanément. L'adresse de la page se met à jour pour partager votre scénario.</p>
+  <Simulator client:load />
+</Base>

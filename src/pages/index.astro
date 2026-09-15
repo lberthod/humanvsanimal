@@ -1,0 +1,73 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchupTable from '../components/MatchupTable.astro';
+import Simulator from '../components/Simulator.vue';
+import { animals, profiles } from '../lib/model';
+
+const title = 'Humain vs Animal : combien d\'humains pour battre un gorille, un lion ou un ours ?';
+const description = 'Simulateur et tableau comparatif : combien d\'humains faut-il, à mains nues ou armés, pour vaincre un chimpanzé, un gorille, un lion, un ours, un loup ou un crocodile ? Analyse ludique du rapport de force homme contre animal.';
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Humain vs Animal',
+    url: Astro.site?.href,
+    inLanguage: 'fr',
+    description,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      { '@type': 'Question', name: 'Combien d\'humains pour tuer un gorille à mains nues ?', acceptedAnswer: { '@type': 'Answer', text: 'Il faudrait environ 45 à 50 humains ordinaires coordonnés pour venir à bout d\'un gorille dos argenté de 180 kg, au prix de 15 à 20 morts. Avec des experts en arts martiaux, 20 à 25 suffisent.' } },
+      { '@type': 'Question', name: 'Un humain peut-il battre un chimpanzé ?', acceptedAnswer: { '@type': 'Answer', text: 'Non, en duel à mains nues le chimpanzé gagne quasi systématiquement grâce à sa force explosive et ses canines. Il faut 4 à 5 experts en arts martiaux ou 10 à 12 humains ordinaires pour le neutraliser.' } },
+      { '@type': 'Question', name: 'Combien d\'humains contre un ours brun ?', acceptedAnswer: { '@type': 'Answer', text: 'Environ 60 à 80 humains ordinaires à mains nues, avec 20 à 30 morts. Un soldat armé d\'un fusil d\'assaut suffit généralement seul.' } },
+    ],
+  },
+];
+---
+<Base {title} {description} {jsonLd}>
+  <h1>Combien d'humains faut-il pour battre un animal ?</h1>
+  <p class="lead">
+    Le débat « 100 humains contre 1 gorille » enfin chiffré. Choisissez un animal, un profil humain et un nombre de combattants :
+    le simulateur estime les chances de victoire et le bilan des pertes. Espace clos, animal adulte enragé, humains coordonnés.
+  </p>
+  <p><a class="btn" href="/simulateur/">Lancer le simulateur</a> <a class="btn secondary" href="/combats/">Voir les 36 combats</a></p>
+
+  <h2>Simulateur rapide</h2>
+  <Simulator client:visible />
+
+  <h2>Tableau comparatif : humains nécessaires par animal et par profil</h2>
+  <MatchupTable />
+
+  <h2>Les animaux</h2>
+  <div class="grid">
+    {animals.map((a) => (
+      <a class="card" href={`/animaux/${a.slug}/`} style="text-decoration:none;color:inherit">
+        <div class="emoji">{a.emoji}</div>
+        <h3>{a.name}</h3>
+        <p class="note">{a.weight} kg · létalité {a.lethality}/4</p>
+      </a>
+    ))}
+  </div>
+
+  <h2>Les profils humains</h2>
+  <div class="grid">
+    {profiles.map((p) => (
+      <a class="card" href={`/profils/${p.slug}/`} style="text-decoration:none;color:inherit">
+        <div class="emoji">{p.emoji}</div>
+        <h3>{p.name}</h3>
+        <p class="note">{p.weight} kg · {p.armed ? 'armé' : 'mains nues'}</p>
+      </a>
+    ))}
+  </div>
+
+  <h2>Questions fréquentes</h2>
+  <h3>Combien d'humains pour tuer un gorille à mains nues ?</h3>
+  <p>Environ 45 à 50 humains ordinaires, avec 15 à 20 morts. Le gorille frappe assez fort pour briser une colonne vertébrale et sa masse de 180 kg exige une véritable marée humaine pour être immobilisée. <a href="/combats/humain-lambda-vs-gorille/">Voir l'analyse complète</a>.</p>
+  <h3>Un humain seul peut-il battre un chimpanzé ?</h3>
+  <p>Non. Même un expert en arts martiaux se fait mutiler en duel. Il faut 4 à 5 experts, ou 10 à 12 humains ordinaires. <a href="/combats/expert-arts-martiaux-vs-chimpanze/">Pourquoi le Kung-fu ne suffit pas</a>.</p>
+  <h3>Et avec des armes ?</h3>
+  <p>Le couteau change tout sur les petits animaux : un expert bat un loup ou un chimpanzé. Le fusil d'assaut rend le nombre presque inutile, un seul soldat suffit face à tous les animaux du tableau.</p>
+  <p class="note">Tous les chiffres sont des estimations spéculatives et ludiques. <a href="/methode/">Lire la méthode</a>.</p>
+</Base>

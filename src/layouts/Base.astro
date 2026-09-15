@@ -1,0 +1,63 @@
+---
+import '../styles/global.css';
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  type?: 'website' | 'article';
+}
+const { title, description, jsonLd, type = 'website' } = Astro.props;
+const canonical = Astro.props.canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+const siteName = 'Humain vs Animal';
+const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
+const ogImage = new URL('/og.svg', Astro.site).href;
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <header class="site">
+      <div class="container">
+        <a class="brand" href="/">🧍 Humain vs Animal 🦍</a>
+        <nav aria-label="Navigation principale">
+          <a href="/simulateur/">Simulateur</a>
+          <a href="/animaux/">Animaux</a>
+          <a href="/profils/">Profils humains</a>
+          <a href="/combats/">Tous les combats</a>
+          <a href="/methode/">Méthode</a>
+        </nav>
+      </div>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site">
+      <div class="container">
+        <span>© {new Date().getFullYear()} Humain vs Animal. Estimations spéculatives à but ludique, aucun animal ni humain n'a été blessé.</span>
+        <span><a href="/methode/">Comment sont calculés les chiffres ?</a></span>
+      </div>
+    </footer>
+  </body>
+</html>

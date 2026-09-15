@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import { animals, profiles, getThreshold, formatThreshold, matchupSlug } from '../../lib/model';
+export function getStaticPaths() {
+  return profiles.map((p) => ({ params: { slug: p.slug }, props: { profile: p } }));
+}
+const { profile } = Astro.props;
+const title = `${profile.name} : combien en faut-il contre chaque animal ?`;
+const description = `${profile.description} Nombre nécessaire contre un loup, un chimpanzé, un lion, un gorille, un ours et un crocodile.`;
+---
+<Base {title} {description} type="article">
+  <p class="breadcrumb"><a href="/">Accueil</a> › <a href="/profils/">Profils</a> › {profile.name}</p>
+  <h1>{profile.emoji} {title}</h1>
+  <p class="lead">{profile.description}</p>
+  <div class="two-col">
+    <div class="card"><h3>Atouts</h3><ul class="clean">{profile.strengths.map((s) => <li>{s}</li>)}</ul></div>
+    <div class="card"><h3>Faiblesses</h3><ul class="clean">{profile.weaknesses.map((s) => <li>{s}</li>)}</ul></div>
+  </div>
+  <h2>Nombre nécessaire par animal</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Animal</th><th>Humains nécessaires</th><th>Analyse</th></tr></thead>
+      <tbody>
+        {animals.map((a) => (
+          <tr>
+            <td>{a.emoji} {a.name} <span class="note">({a.weight} kg)</span></td>
+            <td><span class={`tag ${getThreshold(a.slug, profile.slug) === null ? 'bad' : 'ok'}`}>{formatThreshold(getThreshold(a.slug, profile.slug))}</span></td>
+            <td><a href={`/combats/${matchupSlug(a, profile)}/`}>Voir le combat →</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p><a class="btn" href={`/simulateur/?profil=${profile.slug}`}>Simuler avec ce profil</a></p>
+</Base>

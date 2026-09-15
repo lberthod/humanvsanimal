@@ -1,0 +1,9 @@
+{
+  "_comment": "Nombre d'humains [min, max] pour une victoire quasi certaine. null = impossible.",
+  "loup":      { "humain-lambda": [2, 3],   "bimbo": [4, 5],     "retraite": [6, 8],   "expert-arts-martiaux": [1, 1],   "combattant-couteau": [1, 1],  "soldat": [1, 1] },
+  "chimpanze": { "humain-lambda": [10, 12], "bimbo": [20, 25],   "retraite": [35, 40], "expert-arts-martiaux": [4, 5],   "combattant-couteau": [1, 2],  "soldat": [1, 1] },
+  "lion":      { "humain-lambda": [30, 40], "bimbo": [80, 100],  "retraite": null,     "expert-arts-martiaux": [15, 20], "combattant-couteau": [4, 6],  "soldat": [1, 1] },
+  "gorille":   { "humain-lambda": [45, 50], "bimbo": [100, 130], "retraite": null,     "expert-arts-martiaux": [20, 25], "combattant-couteau": [5, 6],  "soldat": [1, 1] },
+  "ours-brun": { "humain-lambda": [60, 80], "bimbo": [150, 200], "retraite": null,     "expert-arts-martiaux": [30, 40], "combattant-couteau": [8, 10], "soldat": [1, 2] },
+  "crocodile": { "humain-lambda": [25, 30], "bimbo": [60, 80],   "retraite": null,     "expert-arts-martiaux": [10, 12], "combattant-couteau": [2, 3],  "soldat": [1, 1] }
+}

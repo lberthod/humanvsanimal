@@ -1,0 +1,68 @@
+[
+  {
+    "slug": "humain-lambda",
+    "name": "Humain lambda",
+    "shortName": "Lambda",
+    "weight": 75,
+    "emoji": "🧍",
+    "armed": false,
+    "description": "Homme ordinaire de 75 kg, sans entraînement au combat. Sa seule force est le nombre.",
+    "strengths": ["Masse correcte"],
+    "weaknesses": ["Aucune technique", "Panique face au sang"]
+  },
+  {
+    "slug": "bimbo",
+    "name": "Femme non sportive (« bimbo »)",
+    "shortName": "Bimbo",
+    "weight": 55,
+    "emoji": "💅",
+    "armed": false,
+    "description": "Personne de 55 kg sans aucun conditionnement physique ni expérience de la violence.",
+    "strengths": ["Aucun"],
+    "weaknesses": ["Faible masse", "Aucun conditionnement", "Panique"]
+  },
+  {
+    "slug": "retraite",
+    "name": "Vieux retraité (70 ans)",
+    "shortName": "Retraité",
+    "weight": 70,
+    "emoji": "👴",
+    "armed": false,
+    "description": "Personne de 70 ans, 70 kg, os fragiles et souffle court. Une chute peut suffire à le mettre hors combat.",
+    "strengths": ["Aucun"],
+    "weaknesses": ["Os fragiles", "Lent", "Souffle court"]
+  },
+  {
+    "slug": "expert-arts-martiaux",
+    "name": "Expert en arts martiaux (mains nues)",
+    "shortName": "Expert",
+    "weight": 80,
+    "emoji": "🥋",
+    "armed": false,
+    "description": "Combattant de 80 kg, sang-froid, précision et coordination. Sait immobiliser et frapper les points vitaux.",
+    "strengths": ["Précision", "Sang-froid", "Coordination de groupe"],
+    "weaknesses": ["Toujours limité par la force brute"]
+  },
+  {
+    "slug": "combattant-couteau",
+    "name": "Combattant au couteau",
+    "shortName": "Couteau",
+    "weight": 80,
+    "emoji": "🔪",
+    "armed": true,
+    "description": "Expert armé d'un couteau de combat. Peut atteindre les organes vitaux mais doit rester au contact de l'animal.",
+    "strengths": ["Atteint les organes vitaux", "Sang-froid"],
+    "weaknesses": ["Doit rester au contact", "Prend des dégâts"]
+  },
+  {
+    "slug": "soldat",
+    "name": "Soldat avec fusil d'assaut",
+    "shortName": "Soldat",
+    "weight": 85,
+    "emoji": "🎖️",
+    "armed": true,
+    "description": "Militaire entraîné, armé d'un fusil d'assaut. La létalité à distance rend le nombre presque inutile.",
+    "strengths": ["Létalité à distance", "Entraînement au stress"],
+    "weaknesses": ["Rater son coup face à une charge = mort"]
+  }
+]

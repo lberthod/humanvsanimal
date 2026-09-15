@@ -1,0 +1,39 @@
+---
+import Base from '../../layouts/Base.astro';
+import { animals, profiles, getThreshold, formatThreshold, matchupSlug } from '../../lib/model';
+export function getStaticPaths() {
+  return animals.map((a) => ({ params: { slug: a.slug }, props: { animal: a } }));
+}
+const { animal } = Astro.props;
+const title = `Combien d'humains pour battre un ${animal.name.toLowerCase()} ?`;
+const description = `${animal.name} (${animal.weight} kg) : combien d'humains ordinaires, d'experts en arts martiaux ou de soldats faut-il pour le vaincre ? Forces, faiblesses et bilan des pertes.`;
+const jsonLd = {
+  '@context': 'https://schema.org', '@type': 'Article', headline: title, description, inLanguage: 'fr',
+  mainEntityOfPage: Astro.url.href, author: { '@type': 'Organization', name: 'Humain vs Animal' },
+};
+---
+<Base {title} {description} {jsonLd} type="article">
+  <p class="breadcrumb"><a href="/">Accueil</a> › <a href="/animaux/">Animaux</a> › {animal.name}</p>
+  <h1>{animal.emoji} {title}</h1>
+  <p class="lead">{animal.description}</p>
+  <div class="two-col">
+    <div class="card"><h3>Forces</h3><ul class="clean">{animal.strengths.map((s) => <li>{s}</li>)}</ul></div>
+    <div class="card"><h3>Faiblesses</h3><ul class="clean">{animal.weaknesses.map((s) => <li>{s}</li>)}</ul></div>
+  </div>
+  <h2>Humains nécessaires selon le profil</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Profil humain</th><th>Humains nécessaires</th><th>Analyse</th></tr></thead>
+      <tbody>
+        {profiles.map((p) => (
+          <tr>
+            <td>{p.emoji} {p.name}</td>
+            <td><span class={`tag ${getThreshold(animal.slug, p.slug) === null ? 'bad' : 'ok'}`}>{formatThreshold(getThreshold(animal.slug, p.slug))}</span></td>
+            <td><a href={`/combats/${matchupSlug(animal, p)}/`}>Voir le combat →</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p><a class="btn" href={`/simulateur/?animal=${animal.slug}`}>Simuler un combat contre {animal.name.toLowerCase()}</a></p>
+</Base>
