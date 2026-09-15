@@ -23,7 +23,7 @@ let splashes: Splash[] = [];
 let shots: Shot[] = [];
 let outcomes: Status[] = [];
 let animal = { x: W / 2, y: H / 2, r: 30, stamina: 1, dead: false, shake: 0 };
-let nextStrike = 0, nextShot = 0, tCombatStart = -1, combatTotal = 6000, rafId = 0, lastTs = 0;
+let nextStrike = 0, nextShot = 0, tCombatStart = -1, combatTotal = 6000, lastTs = 0;
 let victory = false;
 
 const isRanged = computed(() => props.profile.slug === 'soldat');
@@ -169,7 +169,7 @@ function finish(win: boolean) {
   banner.value = win
     ? `Victoire humaine en ${(elapsed.value / 1000).toFixed(0)} s : ${dead.value} mort(s), ${wounded.value} blessé(s).`
     : `Défaite humaine : ${dead.value} mort(s), ${wounded.value} blessé(s), l'animal reste debout.`;
-  setTimeout(() => { running.value = false; cancelAnimationFrame(rafId); draw(); }, 1800);
+  setTimeout(() => { stop(); draw(); }, 1800);
 }
 function checkEnd() { /* laisser l'animation se poser */ }
 
@@ -222,22 +222,25 @@ function draw() {
   }
 }
 
-function loop(ts: number) {
+// Minuterie fixe plutôt que requestAnimationFrame seul : certains navigateurs
+// intégrés ou onglets en arrière-plan limitent fortement rAF.
+let timer: ReturnType<typeof setInterval> | undefined;
+function tick() {
   if (!running.value) return;
-  const dt = Math.min(50, ts - lastTs) * speed.value; lastTs = ts;
+  const now = performance.now();
+  const dt = Math.min(50, now - lastTs) * speed.value; lastTs = now;
   step(dt);
   draw();
-  rafId = requestAnimationFrame(loop);
 }
 
 function start() {
-  cancelAnimationFrame(rafId);
+  stop();
   setup();
   running.value = true;
   lastTs = performance.now();
-  rafId = requestAnimationFrame(loop);
+  timer = setInterval(tick, 1000 / 60);
 }
-function stop() { running.value = false; cancelAnimationFrame(rafId); }
+function stop() { running.value = false; if (timer) clearInterval(timer); timer = undefined; }
 
 watch(() => [props.animal.slug, props.profile.slug, props.count], () => { stop(); setup(); finished.value = false; banner.value = ''; draw(); });
 onMounted(() => { setup(); draw(); });

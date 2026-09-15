@@ -105,7 +105,7 @@ function setThreshold() {
       </ul>
       <p class="note">
         Seuil de victoire quasi certaine pour ce duel : <strong>{{ formatThreshold(result.threshold) }}</strong>
-        <template v-if="result.threshold"> {{ profile.shortName.toLowerCase() }}(s)</template>.
+<template v-if="result.threshold">&nbsp;{{ profile.shortName.toLowerCase() }}(s)</template>.
         Estimation ludique, pas une donnée scientifique.
       </p>
     </div>
