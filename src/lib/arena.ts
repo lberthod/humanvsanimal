@@ -5,6 +5,7 @@ export type Status = 'alive' | 'light' | 'severe' | 'dead' | 'fled';
 export interface Human { id: number; x: number; y: number; status: Status; engaged: boolean; recoverAt: number; tx: number; ty: number }
 export interface Splash { x: number; y: number; t: number }
 export interface Shot { x1: number; y1: number; x2: number; y2: number; t: number }
+export interface ArenaEvent { t: number; x: number; y: number; kind: 'dead' | 'severe' | 'light' | 'shot' | 'beastDead' | 'flee' }
 export interface Beast { x: number; y: number; r: number; stamina: number; dead: boolean; shake: number }
 
 const bodyParts = ['au visage', 'à la gorge', 'au bras', 'à la cuisse', 'à la main', 'aux côtes', 'à la nuque'];
@@ -24,6 +25,7 @@ export class ArenaSim {
   shots: Shot[] = [];
   beast: Beast = { x: W / 2, y: H / 2, r: 30, stamina: 1, dead: false, shake: 0 };
   log: string[] = [];
+  events: ArenaEvent[] = [];
   elapsed = 0;
   finished = false;
   victory = false;
@@ -38,7 +40,7 @@ export class ArenaSim {
     this.knife = profile.slug === 'combattant-couteau';
     this.n = Math.min(count, 300);
     const n = this.n;
-    this.beast = { x: W / 2, y: H / 2, r: 18 + Math.sqrt(animal.weight) * 0.9, stamina: 1, dead: false, shake: 0 };
+    this.beast = { x: W / 2, y: H / 2, r: 24 + Math.sqrt(animal.weight) * 1.1, stamina: 1, dead: false, shake: 0 };
     for (let i = 0; i < n; i++) {
       const side = i % 4;
       const x = side === 0 ? rnd(30, W - 30) : side === 1 ? W - 20 : side === 2 ? rnd(30, W - 30) : 20;
@@ -67,7 +69,7 @@ export class ArenaSim {
   step(dt: number) {
     if (this.finished && this.elapsed > this.finishedAt + 1800) return;
     this.elapsed += dt;
-    const t = this.elapsed, a = this.beast, list = this.humans, engageR = a.r + 9;
+    const t = this.elapsed, a = this.beast, list = this.humans, engageR = a.r + 12;
 
     let engagedCount = 0;
     for (const h of list) {
@@ -91,9 +93,9 @@ export class ArenaSim {
       for (let j = i + 1; j < list.length; j++) {
         const o = list[j]; if (o.status === 'dead' || o.status === 'severe') continue;
         const dx = o.x - h.x, dy = o.y - h.y, d2 = dx * dx + dy * dy;
-        if (d2 < 100 && d2 > 0.01) { const d = Math.sqrt(d2), push = (10 - d) * 0.5; h.x -= (dx / d) * push; h.y -= (dy / d) * push; o.x += (dx / d) * push; o.y += (dy / d) * push; }
+        if (d2 < 196 && d2 > 0.01) { const d = Math.sqrt(d2), push = (14 - d) * 0.5; h.x -= (dx / d) * push; h.y -= (dy / d) * push; o.x += (dx / d) * push; o.y += (dy / d) * push; }
       }
-      h.x = Math.max(14, Math.min(W - 14, h.x)); h.y = Math.max(14, Math.min(H - 14, h.y));
+      h.x = Math.max(26, Math.min(W - 26, h.x)); h.y = Math.max(26, Math.min(H - 26, h.y));
     }
     if (a.dead || this.finished) return;
 
@@ -102,10 +104,10 @@ export class ArenaSim {
     if (engagedCount < 3) {
       let best = targets[0], bd = Infinity;
       for (const h of targets) { const d = Math.hypot(h.x - a.x, h.y - a.y); if (d < bd) { bd = d; best = h; } }
-      if (bd > engageR) { const sp = 0.07 * dt; a.x += ((best.x - a.x) / bd) * sp; a.y += ((best.y - a.y) / bd) * sp; }
+      if (bd > engageR) { const sp = 0.045 * dt; a.x += ((best.x - a.x) / bd) * sp; a.y += ((best.y - a.y) / bd) * sp; }
     }
     a.shake = engagedCount > 0 ? 2 : 0;
-    a.x = Math.max(a.r + 6, Math.min(W - a.r - 6, a.x)); a.y = Math.max(a.r + 6, Math.min(H - a.r - 6, a.y));
+    a.x = Math.max(a.r + 20, Math.min(W - a.r - 20, a.x)); a.y = Math.max(a.r + 20, Math.min(H - a.r - 20, a.y));
 
     const inReach = targets.filter((h) => Math.hypot(h.x - a.x, h.y - a.y) < engageR + 14);
     if (this.combatStart < 0 && (inReach.length > 0 || this.ranged)) this.combatStart = t;
@@ -119,6 +121,7 @@ export class ArenaSim {
       const name = this.animal.name.toLowerCase();
       this.splashes.push({ x: victim.x, y: victim.y, t });
       victim.engaged = false;
+      this.events.push({ t, x: victim.x, y: victim.y, kind: outcome === 'dead' ? 'dead' : outcome === 'severe' ? 'severe' : 'light' });
       if (outcome === 'dead') { victim.status = 'dead'; this.dead++; this.alive--; this.pushLog(`Le ${name} ${verb} l'humain n°${victim.id} ${part} : mort.`); }
       else if (outcome === 'severe') { victim.status = 'severe'; this.wounded++; this.alive--; victim.tx = victim.x < W / 2 ? 24 : W - 24; victim.ty = Math.max(24, Math.min(H - 24, victim.y + rnd(-60, 60))); this.pushLog(`Humain n°${victim.id} ${verb === 'mord' ? 'mordu' : 'touché'} ${part} : blessé grave, il rampe hors de la mêlée.`); }
       else { victim.status = 'light'; victim.recoverAt = t + 900; this.wounded++; const dx = victim.x - a.x, dy = victim.y - a.y, d = Math.hypot(dx, dy) || 1; victim.x += (dx / d) * 45; victim.y += (dy / d) * 45; this.pushLog(`Humain n°${victim.id} projeté en arrière : blessé léger, il revient au contact.`); }
@@ -128,19 +131,22 @@ export class ArenaSim {
     if (this.ranged && t >= this.nextShot) {
       const shooter = targets[Math.floor(Math.random() * targets.length)];
       this.shots.push({ x1: shooter.x, y1: shooter.y, x2: a.x + rnd(-8, 8), y2: a.y + rnd(-8, 8), t });
+      this.events.push({ t, x: shooter.x, y: shooter.y, kind: 'shot' });
       this.splashes.push({ x: a.x + rnd(-10, 10), y: a.y + rnd(-10, 10), t });
       this.nextShot = t + 140;
     }
     if (this.knife && engagedCount > 0 && Math.random() < dt / 400) this.splashes.push({ x: a.x + rnd(-a.r, a.r), y: a.y + rnd(-a.r, a.r), t });
     this.shots = this.shots.filter((s) => t - s.t <= 90);
     if (this.splashes.length > 400) this.splashes = this.splashes.slice(-400);
+    this.events = this.events.filter((e) => t - e.t < 4000);
 
     if (this.combatStart >= 0 && (engagedCount > 0 || this.ranged)) {
-      const pressure = this.ranged ? 1 : Math.min(1.6, engagedCount / Math.max(3, (this.result.threshold?.[0] ?? this.n) * 0.5));
+      const pressure = this.ranged ? 1 : Math.min(2, engagedCount / Math.max(2, (this.result.threshold?.[0] ?? this.n) * 0.35));
       const floor = this.victory ? 0 : 0.35;
       a.stamina = Math.max(floor, a.stamina - (dt / this.combatTotal) * pressure);
       if (this.victory && a.stamina <= 0 && this.outcomes.length === 0) {
         a.dead = true;
+        this.events.push({ t, x: a.x, y: a.y, kind: 'beastDead' });
         this.pushLog(`Le ${this.animal.name.toLowerCase()} s'effondre, ${this.ranged ? 'criblé de balles' : 'étouffé sous la masse'}. Victoire humaine.`);
         this.finish(true);
         return;
@@ -149,10 +155,11 @@ export class ArenaSim {
     // Sécurité : victoire acquise mais plus personne d'engagé (ex. tous blessés légers) → l'endurance continue de baisser lentement
     if (this.victory && this.combatStart >= 0 && this.outcomes.length === 0 && engagedCount === 0 && !this.ranged && t > this.combatStart + 4000) {
       a.stamina = Math.max(0, a.stamina - dt / 3000);
-      if (a.stamina <= 0) { a.dead = true; this.pushLog(`Le ${this.animal.name.toLowerCase()} s'effondre d'épuisement. Victoire humaine.`); this.finish(true); return; }
+      if (a.stamina <= 0) { a.dead = true; this.events.push({ t, x: a.x, y: a.y, kind: 'beastDead' }); this.pushLog(`Le ${this.animal.name.toLowerCase()} s'effondre d'épuisement. Victoire humaine.`); this.finish(true); return; }
     }
     if (!this.victory && this.outcomes.length === 0 && this.combatStart >= 0 && t > this.combatStart + 1500) {
       for (const h of targets) { h.status = 'fled'; h.engaged = false; h.tx = h.x < W / 2 ? 18 : W - 18; h.ty = h.y < H / 2 ? 18 : H - 18; }
+      this.events.push({ t, x: a.x, y: a.y, kind: 'flee' });
       this.pushLog(`Les survivants paniquent et refluent vers les barreaux. Le ${this.animal.name.toLowerCase()} reste maître de la cage.`);
       this.finish(false);
     }
