@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { animals, profiles, simulate, formatThreshold } from '../lib/model';
+import Arena from './Arena.vue';
 
 const props = defineProps<{ animal?: string; profile?: string; count?: number }>();
 
@@ -108,11 +109,15 @@ function setThreshold() {
         Estimation ludique, pas une donnée scientifique.
       </p>
     </div>
+
+    <h2 class="arena-title">Simulation 2D dans la cage</h2>
+    <Arena :animal="animal" :profile="profile" :count="Math.max(1, Math.round(count))" :result="result" />
   </div>
 </template>
 
 <style scoped>
 .sim { display: grid; gap: 20px; }
+.arena-title { margin: 8px 0 0; }
 .controls { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: end; }
 label { display: grid; gap: 6px; font-weight: 600; }
 label span { font-size: .9rem; color: var(--muted); }
