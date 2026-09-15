@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import MatchupTable from '../components/MatchupTable.astro';
 import Simulator from '../components/Simulator.vue';
 import { animals, profiles } from '../lib/model';
+import { animalIcon, profileIcon } from '../lib/icons';
 
 const title = 'Humain vs Animal : combien d\'humains pour battre un gorille, un lion ou un ours ?';
 const description = 'Simulateur et tableau comparatif : combien d\'humains faut-il, à mains nues ou armés, pour vaincre un chimpanzé, un gorille, un lion, un ours, un loup ou un crocodile ? Analyse ludique du rapport de force homme contre animal.';
@@ -32,7 +33,10 @@ const jsonLd = [
     Le débat « 100 humains contre 1 gorille » enfin chiffré. Choisissez un animal, un profil humain et un nombre de combattants :
     le simulateur estime les chances de victoire et le bilan des pertes. Espace clos, animal adulte enragé, humains coordonnés.
   </p>
-  <p><a class="btn" href="/simulateur/">Lancer le simulateur</a> <a class="btn secondary" href="/combats/">Voir les 36 combats</a></p>
+  <div class="hero-cta">
+    <a class="btn" href="/simulateur/">Lancer le simulateur</a>
+    <a class="btn secondary" href="/combats/">Voir les 36 combats</a>
+  </div>
 
   <h2>Simulateur rapide</h2>
   <Simulator client:visible />
@@ -43,8 +47,8 @@ const jsonLd = [
   <h2>Les animaux</h2>
   <div class="grid">
     {animals.map((a) => (
-      <a class="card" href={`/animaux/${a.slug}/`} style="text-decoration:none;color:inherit">
-        <div class="emoji">{a.emoji}</div>
+      <a class="card card-link" href={`/animaux/${a.slug}/`}>
+        <div class="icon-badge" set:html={animalIcon(a.slug)} />
         <h3>{a.name}</h3>
         <p class="note">{a.weight} kg · létalité {a.lethality}/4</p>
       </a>
@@ -54,8 +58,8 @@ const jsonLd = [
   <h2>Les profils humains</h2>
   <div class="grid">
     {profiles.map((p) => (
-      <a class="card" href={`/profils/${p.slug}/`} style="text-decoration:none;color:inherit">
-        <div class="emoji">{p.emoji}</div>
+      <a class="card card-link" href={`/profils/${p.slug}/`}>
+        <div class="icon-badge" set:html={profileIcon(p.slug)} />
         <h3>{p.name}</h3>
         <p class="note">{p.weight} kg · {p.armed ? 'armé' : 'mains nues'}</p>
       </a>

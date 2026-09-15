@@ -1,9 +1,9 @@
 {
   "_comment": "Nombre d'humains [min, max] pour une victoire quasi certaine. null = impossible.",
-  "loup":      { "humain-lambda": [2, 3],   "bimbo": [4, 5],     "retraite": [6, 8],   "expert-arts-martiaux": [1, 1],   "combattant-couteau": [1, 1],  "soldat": [1, 1] },
-  "chimpanze": { "humain-lambda": [10, 12], "bimbo": [20, 25],   "retraite": [35, 40], "expert-arts-martiaux": [4, 5],   "combattant-couteau": [1, 2],  "soldat": [1, 1] },
-  "lion":      { "humain-lambda": [30, 40], "bimbo": [80, 100],  "retraite": null,     "expert-arts-martiaux": [15, 20], "combattant-couteau": [4, 6],  "soldat": [1, 1] },
-  "gorille":   { "humain-lambda": [45, 50], "bimbo": [100, 130], "retraite": null,     "expert-arts-martiaux": [20, 25], "combattant-couteau": [5, 6],  "soldat": [1, 1] },
-  "ours-brun": { "humain-lambda": [60, 80], "bimbo": [150, 200], "retraite": null,     "expert-arts-martiaux": [30, 40], "combattant-couteau": [8, 10], "soldat": [1, 2] },
-  "crocodile": { "humain-lambda": [25, 30], "bimbo": [60, 80],   "retraite": null,     "expert-arts-martiaux": [10, 12], "combattant-couteau": [2, 3],  "soldat": [1, 1] }
+  "loup":      { "humain-lambda": [2, 3],   "bimbo": [4, 5],     "retraite": [6, 8],   "expert-arts-martiaux": [1, 1],   "combattant-couteau": [1, 1],  "soldat": [1, 1], "boxeur": [1, 2],   "policier": [1, 1], "chasseur-arc": [1, 1],  "lutteur-sumo": [1, 2] },
+  "chimpanze": { "humain-lambda": [10, 12], "bimbo": [20, 25],   "retraite": [35, 40], "expert-arts-martiaux": [4, 5],   "combattant-couteau": [1, 2],  "soldat": [1, 1], "boxeur": [5, 6],   "policier": [1, 1], "chasseur-arc": [2, 3],  "lutteur-sumo": [6, 8] },
+  "lion":      { "humain-lambda": [30, 40], "bimbo": [80, 100],  "retraite": null,     "expert-arts-martiaux": [15, 20], "combattant-couteau": [4, 6],  "soldat": [1, 1], "boxeur": [18, 22], "policier": [2, 3], "chasseur-arc": [5, 7],  "lutteur-sumo": [20, 25] },
+  "gorille":   { "humain-lambda": [45, 50], "bimbo": [100, 130], "retraite": null,     "expert-arts-martiaux": [20, 25], "combattant-couteau": [5, 6],  "soldat": [1, 1], "boxeur": [25, 30], "policier": [2, 3], "chasseur-arc": [6, 8],  "lutteur-sumo": [28, 33] },
+  "ours-brun": { "humain-lambda": [60, 80], "bimbo": [150, 200], "retraite": null,     "expert-arts-martiaux": [30, 40], "combattant-couteau": [8, 10], "soldat": [1, 2], "boxeur": [35, 45], "policier": [3, 4], "chasseur-arc": [10, 14], "lutteur-sumo": [40, 50] },
+  "crocodile": { "humain-lambda": [25, 30], "bimbo": [60, 80],   "retraite": null,     "expert-arts-martiaux": [10, 12], "combattant-couteau": [2, 3],  "soldat": [1, 1], "boxeur": [12, 15], "policier": [2, 3], "chasseur-arc": [3, 4],  "lutteur-sumo": [15, 18] }
 }

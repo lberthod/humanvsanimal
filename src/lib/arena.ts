@@ -1,4 +1,4 @@
-import type { Animal, Profile, Simulation } from './model';
+import { lowerAnimalName, type Animal, type Profile, type Simulation } from './model';
 
 export const W = 720, H = 440;
 export type Status = 'alive' | 'light' | 'severe' | 'dead' | 'fled';
@@ -38,7 +38,7 @@ export class ArenaSim {
   readonly ranged: boolean; readonly knife: boolean; readonly n: number;
 
   constructor(readonly animal: Animal, readonly profile: Profile, count: number, readonly result: Simulation) {
-    this.ranged = profile.slug === 'soldat';
+    this.ranged = profile.slug === 'soldat' || profile.slug === 'policier' || profile.slug === 'chasseur-arc';
     this.knife = profile.slug === 'combattant-couteau';
     this.n = Math.min(count, 300);
     const n = this.n;
@@ -59,13 +59,16 @@ export class ArenaSim {
     this.combatTotal = Math.max(3500, this.outcomes.length * this.strikeInterval() + 2000) / (this.ranged ? 2 : 1);
     this.victory = result.animalDies;
     this.alive = n;
-    this.pushLog(`${n} ${profile.name.toLowerCase()} entrent dans la cage face au ${animal.name.toLowerCase()}.`);
+    this.pushLog(`${n} ${profile.name.toLowerCase()} entrent dans la cage face au ${lowerAnimalName(animal)}.`);
   }
 
   private pushLog(s: string) { this.log = [...this.log.slice(-7), `${(this.elapsed / 1000).toFixed(1)} s · ${s}`]; }
   private strikeInterval() {
     const base = ({ 1: 900, 2: 650, 3: 500, 4: 420 } as Record<number, number>)[this.animal.lethality] ?? 600;
     return this.ranged ? base * 1.5 : base;
+  }
+  private shotInterval() {
+    return this.profile.slug === 'chasseur-arc' ? 900 : this.profile.slug === 'policier' ? 350 : 140;
   }
 
   step(dt: number) {
@@ -121,7 +124,7 @@ export class ArenaSim {
       const vs = verbs[this.animal.lethality] ?? verbs[2];
       const verb = vs[Math.floor(Math.random() * vs.length)];
       const part = bodyParts[Math.floor(Math.random() * bodyParts.length)];
-      const name = this.animal.name.toLowerCase();
+      const name = lowerAnimalName(this.animal);
       this.splashes.push({ x: victim.x, y: victim.y, t });
       victim.engaged = false;
       this.events.push({ t, x: victim.x, y: victim.y, kind: outcome === 'dead' ? 'dead' : outcome === 'severe' ? 'severe' : 'light' });
@@ -136,7 +139,7 @@ export class ArenaSim {
       this.shots.push({ x1: shooter.x, y1: shooter.y, x2: a.x + rnd(-8, 8), y2: a.y + rnd(-8, 8), t });
       this.events.push({ t, x: shooter.x, y: shooter.y, kind: 'shot' });
       this.splashes.push({ x: a.x + rnd(-10, 10), y: a.y + rnd(-10, 10), t });
-      this.nextShot = t + 140;
+      this.nextShot = t + this.shotInterval();
     }
     if (this.knife && engagedCount > 0 && Math.random() < dt / 400) this.splashes.push({ x: a.x + rnd(-a.r, a.r), y: a.y + rnd(-a.r, a.r), t });
     this.shots = this.shots.filter((s) => t - s.t <= 90);
@@ -150,7 +153,7 @@ export class ArenaSim {
       if (this.victory && a.stamina <= 0 && this.outcomes.length === 0) {
         a.dead = true;
         this.events.push({ t, x: a.x, y: a.y, kind: 'beastDead' });
-        this.pushLog(`Le ${this.animal.name.toLowerCase()} s'effondre, ${this.ranged ? 'criblé de balles' : 'étouffé sous la masse'}. Victoire humaine.`);
+        this.pushLog(`Le ${lowerAnimalName(this.animal)} s'effondre, ${this.ranged ? 'criblé de balles' : 'étouffé sous la masse'}. Victoire humaine.`);
         this.finish(true);
         return;
       }
@@ -158,12 +161,12 @@ export class ArenaSim {
     // Sécurité : victoire acquise mais plus personne d'engagé (ex. tous blessés légers) → l'endurance continue de baisser lentement
     if (this.victory && this.combatStart >= 0 && this.outcomes.length === 0 && engagedCount === 0 && !this.ranged && t > this.combatStart + 4000) {
       a.stamina = Math.max(0, a.stamina - dt / 3000);
-      if (a.stamina <= 0) { a.dead = true; this.events.push({ t, x: a.x, y: a.y, kind: 'beastDead' }); this.pushLog(`Le ${this.animal.name.toLowerCase()} s'effondre d'épuisement. Victoire humaine.`); this.finish(true); return; }
+      if (a.stamina <= 0) { a.dead = true; this.events.push({ t, x: a.x, y: a.y, kind: 'beastDead' }); this.pushLog(`Le ${lowerAnimalName(this.animal)} s'effondre d'épuisement. Victoire humaine.`); this.finish(true); return; }
     }
     if (!this.victory && this.outcomes.length === 0 && this.combatStart >= 0 && t > this.combatStart + 1500) {
       for (const h of targets) { h.status = 'fled'; h.engaged = false; h.tx = h.x < W / 2 ? 18 : W - 18; h.ty = h.y < H / 2 ? 18 : H - 18; }
       this.events.push({ t, x: a.x, y: a.y, kind: 'flee' });
-      this.pushLog(`Les survivants paniquent et refluent vers les barreaux. Le ${this.animal.name.toLowerCase()} reste maître de la cage.`);
+      this.pushLog(`Les survivants paniquent et refluent vers les barreaux. Le ${lowerAnimalName(this.animal)} reste maître de la cage.`);
       this.finish(false);
     }
   }

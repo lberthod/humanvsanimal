@@ -1,20 +1,31 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { animals, profiles, getThreshold, formatThreshold, matchupSlug } from '../../lib/model';
+import { animals, profiles, getThreshold, formatThreshold, matchupSlug, lowerAnimalName } from '../../lib/model';
+import { animalIcon, profileIcon } from '../../lib/icons';
 export function getStaticPaths() {
   return animals.map((a) => ({ params: { slug: a.slug }, props: { animal: a } }));
 }
 const { animal } = Astro.props;
-const title = `Combien d'humains pour battre un ${animal.name.toLowerCase()} ?`;
+const title = `Combien d'humains pour battre un ${lowerAnimalName(animal)} ?`;
 const description = `${animal.name} (${animal.weight} kg) : combien d'humains ordinaires, d'experts en arts martiaux ou de soldats faut-il pour le vaincre ? Forces, faiblesses et bilan des pertes.`;
-const jsonLd = {
-  '@context': 'https://schema.org', '@type': 'Article', headline: title, description, inLanguage: 'fr',
-  mainEntityOfPage: Astro.url.href, author: { '@type': 'Organization', name: 'Humain vs Animal' },
-};
+const jsonLd = [
+  {
+    '@context': 'https://schema.org', '@type': 'Article', headline: title, description, inLanguage: 'fr',
+    mainEntityOfPage: Astro.url.href, author: { '@type': 'Organization', name: 'Humain vs Animal' },
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: new URL('/', Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: 'Animaux', item: new URL('/animaux/', Astro.site).href },
+      { '@type': 'ListItem', position: 3, name: animal.name, item: Astro.url.href },
+    ],
+  },
+];
 ---
 <Base {title} {description} {jsonLd} type="article">
   <p class="breadcrumb"><a href="/">Accueil</a> › <a href="/animaux/">Animaux</a> › {animal.name}</p>
-  <h1>{animal.emoji} {title}</h1>
+  <h1><span class="ico" set:html={animalIcon(animal.slug)} /> {title}</h1>
   <p class="lead">{animal.description}</p>
   <div class="two-col">
     <div class="card"><h3>Forces</h3><ul class="clean">{animal.strengths.map((s) => <li>{s}</li>)}</ul></div>
@@ -27,7 +38,7 @@ const jsonLd = {
       <tbody>
         {profiles.map((p) => (
           <tr>
-            <td>{p.emoji} {p.name}</td>
+            <td><span class="ico" set:html={profileIcon(p.slug)} /> {p.name}</td>
             <td><span class={`tag ${getThreshold(animal.slug, p.slug) === null ? 'bad' : 'ok'}`}>{formatThreshold(getThreshold(animal.slug, p.slug))}</span></td>
             <td><a href={`/combats/${matchupSlug(animal, p)}/`}>Voir le combat →</a></td>
           </tr>
@@ -35,5 +46,5 @@ const jsonLd = {
       </tbody>
     </table>
   </div>
-  <p><a class="btn" href={`/simulateur/?animal=${animal.slug}`}>Simuler un combat contre {animal.name.toLowerCase()}</a></p>
+  <p><a class="btn" href={`/simulateur/?animal=${animal.slug}`}>Simuler un combat contre {lowerAnimalName(animal)}</a></p>
 </Base>

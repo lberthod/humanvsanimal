@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { animals } from '../../lib/model';
+import { animalIcon } from '../../lib/icons';
 const title = 'Les animaux : gorille, chimpanzé, lion, ours, loup, crocodile';
 const description = 'Fiches des animaux du simulateur : poids, létalité, forces et faiblesses face à un groupe d\'humains.';
 ---
@@ -9,8 +10,8 @@ const description = 'Fiches des animaux du simulateur : poids, létalité, force
   <p class="lead">Six adversaires classés du plus abordable au plus terrifiant pour un groupe d'humains.</p>
   <div class="grid">
     {animals.map((a) => (
-      <a class="card" href={`/animaux/${a.slug}/`} style="text-decoration:none;color:inherit">
-        <div class="emoji">{a.emoji}</div>
+      <a class="card card-link" href={`/animaux/${a.slug}/`}>
+        <div class="icon-badge" set:html={animalIcon(a.slug)} />
         <h3>{a.name}</h3>
         <p class="note">{a.weight} kg · létalité {a.lethality}/4</p>
         <p>{a.description}</p>

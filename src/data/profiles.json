@@ -64,5 +64,49 @@
     "description": "Militaire entraîné, armé d'un fusil d'assaut. La létalité à distance rend le nombre presque inutile.",
     "strengths": ["Létalité à distance", "Entraînement au stress"],
     "weaknesses": ["Rater son coup face à une charge = mort"]
+  },
+  {
+    "slug": "boxeur",
+    "name": "Boxeur professionnel",
+    "shortName": "Boxeur",
+    "weight": 90,
+    "emoji": "🥊",
+    "armed": false,
+    "description": "Poids lourd de 90 kg, puissance de frappe et jeu de jambes exceptionnels, mais aucune arme ni prise au sol.",
+    "strengths": ["Puissance de frappe", "Réflexes et esquive"],
+    "weaknesses": ["Aucune arme", "Inutile une fois au sol"]
+  },
+  {
+    "slug": "policier",
+    "name": "Policier avec arme de poing",
+    "shortName": "Policier",
+    "weight": 82,
+    "emoji": "👮",
+    "armed": true,
+    "description": "Agent entraîné au tir, armé d'un pistolet. Létal à distance mais avec un chargeur limité, moins puissant qu'un fusil d'assaut.",
+    "strengths": ["Tir à distance", "Sang-froid opérationnel"],
+    "weaknesses": ["Chargeur limité", "Moins de puissance d'arrêt qu'un fusil"]
+  },
+  {
+    "slug": "chasseur-arc",
+    "name": "Chasseur à l'arc",
+    "shortName": "Chasseur",
+    "weight": 78,
+    "emoji": "🏹",
+    "armed": true,
+    "description": "Archer expérimenté capable de viser les points vitaux à distance, mais avec une cadence de tir lente et un temps de rechargement exposé.",
+    "strengths": ["Tir silencieux et précis", "Peut viser les points vitaux"],
+    "weaknesses": ["Rechargement lent", "Inefficace au contact"]
+  },
+  {
+    "slug": "lutteur-sumo",
+    "name": "Lutteur sumo",
+    "shortName": "Sumo",
+    "weight": 150,
+    "emoji": "🤼",
+    "armed": false,
+    "description": "Colosse de 150 kg, masse et stabilité hors norme pour plaquer et immobiliser, mais peu de frappes réellement létales.",
+    "strengths": ["Masse considérable", "Stabilité au contact"],
+    "weaknesses": ["Peu de frappes létales", "Manque d'endurance sur la durée"]
   }
 ]

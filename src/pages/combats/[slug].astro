@@ -1,7 +1,8 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Simulator from '../../components/Simulator.vue';
-import { animals, profiles, getThreshold, formatThreshold, matchupSlug, simulate } from '../../lib/model';
+import { animals, profiles, getThreshold, formatThreshold, matchupSlug, simulate, pluralShortName, deArticle, lowerAnimalName } from '../../lib/model';
+import { animalIcon, profileIcon } from '../../lib/icons';
 export function getStaticPaths() {
   return animals.flatMap((a) => profiles.map((p) => ({ params: { slug: matchupSlug(a, p) }, props: { animal: a, profile: p } })));
 }
@@ -9,37 +10,47 @@ const { animal, profile } = Astro.props;
 const threshold = getThreshold(animal.slug, profile.slug);
 const count = threshold ? threshold[1] : 50;
 const sim = simulate(animal, profile, count);
-const plural = profile.name.toLowerCase();
+const plural = pluralShortName(profile, count);
 const title = threshold
-  ? `Combien de ${plural} pour battre un ${animal.name.toLowerCase()} ? ${formatThreshold(threshold)}`
-  : `${profile.name} contre ${animal.name.toLowerCase()} : mission impossible`;
+  ? `Combien ${deArticle(plural)} pour battre un ${lowerAnimalName(animal)} ? ${formatThreshold(threshold)}`
+  : `${profile.name} contre ${lowerAnimalName(animal)} : mission impossible`;
 const description = threshold
-  ? `Il faut ${formatThreshold(threshold)} ${plural} pour vaincre un ${animal.name.toLowerCase()} de ${animal.weight} kg, au prix d'environ ${sim.humanDeaths} mort(s) et ${sim.humanSevere} blessé(s) grave(s). Analyse du déroulement du combat.`
-  : `Quel que soit leur nombre, des ${plural} ne peuvent pas venir à bout d'un ${animal.name.toLowerCase()} de ${animal.weight} kg. Explication.`;
-const jsonLd = {
-  '@context': 'https://schema.org', '@type': 'Article', headline: title, description, inLanguage: 'fr',
-  mainEntityOfPage: Astro.url.href, author: { '@type': 'Organization', name: 'Humain vs Animal' },
-};
+  ? `Il faut ${formatThreshold(threshold)} ${plural} pour vaincre un ${lowerAnimalName(animal)} de ${animal.weight} kg, au prix d'environ ${sim.humanDeaths} mort(s) et ${sim.humanSevere} blessé(s) grave(s). Analyse du déroulement du combat.`
+  : `Quel que soit leur nombre, des ${plural} ne peuvent pas venir à bout d'un ${lowerAnimalName(animal)} de ${animal.weight} kg. Explication.`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org', '@type': 'Article', headline: title, description, inLanguage: 'fr',
+    mainEntityOfPage: Astro.url.href, author: { '@type': 'Organization', name: 'Humain vs Animal' },
+  },
+  {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: new URL('/', Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: 'Combats', item: new URL('/combats/', Astro.site).href },
+      { '@type': 'ListItem', position: 3, name: `${profile.name} vs ${animal.name}`, item: Astro.url.href },
+    ],
+  },
+];
 const others = animals.filter((a) => a.slug !== animal.slug);
 const otherProfiles = profiles.filter((p) => p.slug !== profile.slug);
 ---
 <Base {title} {description} {jsonLd} type="article">
   <p class="breadcrumb"><a href="/">Accueil</a> › <a href="/combats/">Combats</a> › {profile.name} vs {animal.name}</p>
-  <h1>{profile.emoji} {profile.name} vs {animal.emoji} {animal.name}</h1>
+  <h1><span class="ico" set:html={profileIcon(profile.slug)} /> {profile.name} vs <span class="ico" set:html={animalIcon(animal.slug)} /> {animal.name}</h1>
   {threshold ? (
-    <p class="lead">Verdict : il faut <strong>{formatThreshold(threshold)} {plural}</strong> pour une victoire quasi certaine contre un {animal.name.toLowerCase()} de {animal.weight} kg.</p>
+    <p class="lead">Verdict : il faut <strong>{formatThreshold(threshold)} {plural}</strong> pour une victoire quasi certaine contre un {lowerAnimalName(animal)} de {animal.weight} kg.</p>
   ) : (
-    <p class="lead">Verdict : <strong>impossible</strong>. Le nombre ne compense pas la fragilité de ce profil face à un {animal.name.toLowerCase()} de {animal.weight} kg.</p>
+    <p class="lead">Verdict : <strong>impossible</strong>. Le nombre ne compense pas la fragilité de ce profil face à un {lowerAnimalName(animal)} de {animal.weight} kg.</p>
   )}
 
   <div class="two-col">
     <div class="card">
-      <h3>{profile.emoji} {profile.name} ({profile.weight} kg)</h3>
+      <h3><span class="ico" set:html={profileIcon(profile.slug)} /> {profile.name} ({profile.weight} kg)</h3>
       <p>{profile.description}</p>
       <p class="note"><a href={`/profils/${profile.slug}/`}>Fiche du profil →</a></p>
     </div>
     <div class="card">
-      <h3>{animal.emoji} {animal.name} ({animal.weight} kg)</h3>
+      <h3><span class="ico" set:html={animalIcon(animal.slug)} /> {animal.name} ({animal.weight} kg)</h3>
       <p>{animal.description}</p>
       <p class="note"><a href={`/animaux/${animal.slug}/`}>Fiche de l'animal →</a></p>
     </div>
@@ -63,7 +74,7 @@ const otherProfiles = profiles.filter((p) => p.slug !== profile.slug);
   <ul class="clean">
     {others.map((a) => <li><a href={`/combats/${matchupSlug(a, profile)}/`}>{profile.name} vs {a.name}</a> : {formatThreshold(getThreshold(a.slug, profile.slug))}</li>)}
   </ul>
-  <h2>D'autres profils contre {animal.name.toLowerCase()}</h2>
+  <h2>D'autres profils contre {lowerAnimalName(animal)}</h2>
   <ul class="clean">
     {otherProfiles.map((p) => <li><a href={`/combats/${matchupSlug(animal, p)}/`}>{p.name} vs {animal.name}</a> : {formatThreshold(getThreshold(animal.slug, p.slug))}</li>)}
   </ul>

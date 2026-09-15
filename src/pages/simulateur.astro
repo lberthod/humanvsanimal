@@ -1,11 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
 import Simulator from '../components/Simulator.vue';
+import GroupSimulator from '../components/GroupSimulator.vue';
 const title = 'Simulateur de combat humain vs animal';
-const description = 'Simulateur interactif : choisissez un animal (gorille, chimpanzé, lion, ours, loup, crocodile), un profil humain et un nombre de combattants pour estimer l\'issue du combat et le bilan des pertes.';
+const description = 'Simulateur interactif : choisissez un animal (gorille, chimpanzé, lion, ours, loup, crocodile), un profil humain et un nombre de combattants pour estimer l\'issue du combat et le bilan des pertes. Mode groupe mixte : plusieurs profils contre plusieurs espèces.';
 ---
 <Base {title} {description} jsonLd={{ '@context': 'https://schema.org', '@type': 'WebApplication', name: title, applicationCategory: 'GameApplication', operatingSystem: 'Web', inLanguage: 'fr', url: Astro.url.href, description }}>
   <h1>Simulateur de combat</h1>
   <p class="lead">Réglez les paramètres, le résultat se met à jour instantanément. L'adresse de la page se met à jour pour partager votre scénario.</p>
   <Simulator client:load />
+
+  <h2>Mode groupe mixte</h2>
+  <p class="lead">Composez une escouade avec plusieurs profils humains à la fois, face à une horde de plusieurs espèces animales.</p>
+  <GroupSimulator client:visible />
 </Base>

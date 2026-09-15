@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { profiles } from '../../lib/model';
+import { profileIcon } from '../../lib/icons';
 const title = 'Les profils humains : du retraité au soldat armé';
 const description = 'Six profils humains comparés face aux animaux : humain ordinaire, personne non sportive, retraité, expert en arts martiaux, combattant au couteau, soldat armé.';
 ---
@@ -9,8 +10,8 @@ const description = 'Six profils humains comparés face aux animaux : humain ord
   <p class="lead">Le nombre d'humains nécessaires varie énormément selon la masse, la technique et l'armement.</p>
   <div class="grid">
     {profiles.map((p) => (
-      <a class="card" href={`/profils/${p.slug}/`} style="text-decoration:none;color:inherit">
-        <div class="emoji">{p.emoji}</div>
+      <a class="card card-link" href={`/profils/${p.slug}/`}>
+        <div class="icon-badge" set:html={profileIcon(p.slug)} />
         <h3>{p.name}</h3>
         <p class="note">{p.weight} kg · {p.armed ? 'armé' : 'mains nues'}</p>
         <p>{p.description}</p>
