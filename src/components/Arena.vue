@@ -23,24 +23,34 @@ interface Particle { x: number; y: number; vx: number; vy: number; life: number;
 let particles: Particle[] = [];
 let seenEvents = new WeakSet<ArenaEvent>();
 let shake = 0;
+const cam = { x: W / 2, y: H / 2, z: 1 };
+let slowmoUntil = 0;
+let flash = 0;
+const phaseLabel: Record<string, string> = { entree: 'Entrée dans la cage', combat: 'Combat', submersion: 'Submersion', verdict: 'Verdict' };
+const phase = ref('entree');
+const engaged = ref(0);
 let lastHumanPos = new Map<number, { x: number; y: number }>();
 
 function sync() {
   if (!sim) return;
-  log.value = sim.log; alive.value = sim.alive; dead.value = sim.dead; wounded.value = sim.wounded; finished.value = sim.finished;
+  log.value = sim.log; alive.value = sim.alive; dead.value = sim.dead; wounded.value = sim.wounded; finished.value = sim.finished; phase.value = sim.phase; engaged.value = sim.engaged;
 }
 function reset() {
   stop();
   sim = new ArenaSim(props.animal, props.profile, Math.max(1, Math.round(props.count)), props.result);
-  particles = []; seenEvents = new WeakSet(); shake = 0; lastHumanPos = new Map();
+  particles = []; seenEvents = new WeakSet(); shake = 0; cam.x = W / 2; cam.y = H / 2; cam.z = 1; slowmoUntil = 0; flash = 0; lastHumanPos = new Map();
   sync(); draw();
 }
 function tick() {
   if (!running.value || !sim) return;
   const now = performance.now();
-  const dt = Math.min(50, now - lastTs) * speed.value; lastTs = now;
+  const real = Math.min(50, now - lastTs); lastTs = now;
+  const slow = now < slowmoUntil ? 0.22 : 1;
+  const dt = real * speed.value * slow;
   sim.step(dt);
   spawnEffects(dt);
+  updateCamera(real);
+  flash = Math.max(0, flash - real / 500);
   sync(); draw();
   if (sim.done && particles.length === 0) stop();
 }
@@ -81,7 +91,7 @@ function handleEvent(e: ArenaEvent) {
       particles.push({ x: e.x, y: e.y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 0.05, life: 0, max: rnd(350, 700), color: '#9e0e14', size: rnd(1.5, 3.5), kind: 'blood' });
     }
   } else if (e.kind === 'beastDead') {
-    shake = 10;
+    shake = 10; slowmoUntil = performance.now() + 1300; flash = 1;
     for (let i = 0; i < 90; i++) {
       const ang = rnd(-Math.PI, 0), sp = rnd(0.12, 0.4);
       particles.push({ x: e.x, y: e.y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life: 0, max: rnd(1500, 2600), color: ['#f0a04b', '#3dd68c', '#f5c542', '#7dd3fc', '#f472b6'][i % 5], size: rnd(3, 6), kind: 'confetti' });
@@ -89,6 +99,18 @@ function handleEvent(e: ArenaEvent) {
   } else if (e.kind === 'shot') {
     shake = Math.max(shake, 1);
   }
+}
+
+function updateCamera(real: number) {
+  if (!sim) return;
+  const a = sim.beast;
+  let tz = 1, tx = W / 2, ty = H / 2;
+  if (sim.combatStarted) { tz = sim.finished ? 1.2 : 1.32; tx = a.x; ty = a.y; }
+  // La vue reste dans l'arène
+  tx = Math.max(W / (2 * tz), Math.min(W - W / (2 * tz), tx));
+  ty = Math.max(H / (2 * tz), Math.min(H - H / (2 * tz), ty));
+  const k = Math.min(1, real / 600);
+  cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; cam.z += (tz - cam.z) * k;
 }
 
 /** Sol de sable pré-rendu (grain, éclairage, marquages). */
@@ -165,9 +187,18 @@ function draw() {
   const t = sim.elapsed, a = sim.beast;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0d0f14'; ctx.fillRect(0, 0, W, H);
   ctx.save();
+  ctx.translate(W / 2, H / 2); ctx.scale(cam.z, cam.z); ctx.translate(-cam.x, -cam.y);
   if (shake > 0) ctx.translate(rnd(-shake, shake), rnd(-shake, shake));
   ctx.drawImage(floorCache, 0, 0, W, H);
+  // Aura de rage sous tout le monde
+  if (!a.dead) {
+    const rage = Math.min(1, a.shake / 2), pulse = 0.5 + 0.5 * Math.sin(t / 120);
+    const aura = ctx.createRadialGradient(a.x, a.y, a.r * 0.4, a.x, a.y, a.r * (1.6 + pulse * 0.3));
+    aura.addColorStop(0, `rgba(229,72,77,${0.12 + 0.28 * rage})`); aura.addColorStop(1, 'rgba(229,72,77,0)');
+    ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 2, 0, Math.PI * 2); ctx.fill();
+  }
 
   // Sang au sol
   for (let i = 0; i < sim.splashes.length; i++) {
@@ -197,25 +228,22 @@ function draw() {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const h of sim.humans) {
     drawables.push({ y: h.y, fn: () => {
-      if (h.status === 'dead') { drawShadow(ctx, h.x, h.y + 4, 9, 4, 0.25); ctx.font = '20px system-ui'; ctx.globalAlpha = 0.85; ctx.fillText('💀', h.x, h.y); ctx.globalAlpha = 1; return; }
+      if (h.status === 'dead') { ctx.fillStyle = 'rgba(110,10,14,0.65)'; ctx.beginPath(); ctx.ellipse(h.x, h.y + 5, 15, 7, 0, 0, Math.PI * 2); ctx.fill(); ctx.font = '20px system-ui'; ctx.globalAlpha = 0.85; ctx.fillText('💀', h.x, h.y); ctx.globalAlpha = 1; return; }
       if (h.status === 'severe') { drawShadow(ctx, h.x, h.y + 6, 9, 4, 0.25); ctx.font = '20px system-ui'; ctx.fillText('🤕', h.x, h.y); return; }
       const bob = Math.sin((t + h.id * 137) / 90) * 1.5;
       drawShadow(ctx, h.x, h.y + 12, 10, 4, 0.32);
       if (h.status === 'light') { ctx.strokeStyle = 'rgba(245,197,66,0.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(h.x, h.y, 15, 0, Math.PI * 2); ctx.stroke(); }
-      if (h.engaged) { ctx.fillStyle = 'rgba(240,160,75,0.25)'; ctx.beginPath(); ctx.arc(h.x, h.y, 15, 0, Math.PI * 2); ctx.fill(); }
-      ctx.font = '26px system-ui';
+      // Jeton : disque sombre translucide + liseré, plus lisible sur le sable
+      ctx.fillStyle = h.engaged ? 'rgba(240,160,75,0.35)' : 'rgba(20,22,30,0.28)';
+      ctx.beginPath(); ctx.arc(h.x, h.y + bob, 15, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = h.engaged ? 'rgba(255,200,120,0.9)' : 'rgba(255,255,255,0.45)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.font = '24px system-ui';
       ctx.fillText(props.profile.emoji, h.x, h.y + bob);
     } });
   }
   drawables.push({ y: a.y + a.r * 0.6, fn: () => {
-    const rage = a.dead ? 0 : Math.min(1, a.shake / 2);
     drawShadow(ctx, a.x, a.y + a.r * 0.75, a.r * 0.95, a.r * 0.35, 0.4);
-    if (!a.dead) {
-      const pulse = 0.5 + 0.5 * Math.sin(t / 120);
-      const aura = ctx.createRadialGradient(a.x, a.y, a.r * 0.4, a.x, a.y, a.r * (1.5 + pulse * 0.25));
-      aura.addColorStop(0, `rgba(229,72,77,${0.10 + 0.25 * rage})`); aura.addColorStop(1, 'rgba(229,72,77,0)');
-      ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 1.9, 0, Math.PI * 2); ctx.fill();
-    }
+    if (a.dead) { ctx.fillStyle = 'rgba(110,10,14,0.7)'; ctx.beginPath(); ctx.ellipse(a.x, a.y + a.r * 0.4, a.r * 1.2, a.r * 0.5, 0, 0, Math.PI * 2); ctx.fill(); }
     const sx = a.dead ? 0 : (Math.random() - 0.5) * a.shake * 2, sy = a.dead ? 0 : (Math.random() - 0.5) * a.shake * 2;
     const breathe = a.dead ? 1 : 1 + Math.sin(t / 220) * 0.03;
     ctx.save(); ctx.translate(a.x + sx, a.y + sy); ctx.scale(breathe, breathe);
@@ -262,6 +290,23 @@ function draw() {
     ctx.globalAlpha = 1;
   }
   ctx.restore();
+  if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.6})`; ctx.fillRect(0, 0, W, H); }
+
+  // HUD : phase et pression
+  const ph = phaseLabel[sim.phase];
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = 'bold 12px system-ui';
+  const pw = ctx.measureText(ph.toUpperCase()).width + 26;
+  ctx.fillStyle = 'rgba(8,10,14,0.75)'; roundRect(ctx, W / 2 - pw / 2, 12, pw, 26, 13); ctx.fill();
+  ctx.fillStyle = sim.phase === 'verdict' ? (sim.victory ? '#5cf0a8' : '#ff5c61') : sim.phase === 'submersion' ? '#f5c542' : '#fff';
+  ctx.fillText(ph.toUpperCase(), W / 2, 25);
+  if (sim.combatStarted && !sim.finished && !sim.ranged) {
+    const kg = sim.engaged * props.profile.weight;
+    ctx.font = '600 12px system-ui'; ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillStyle = 'rgba(8,10,14,0.7)'; roundRect(ctx, W / 2 - 92, 42, 184, 22, 11); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillText(`Pression : ${sim.engaged} au contact · ${kg} kg`, W / 2, 53);
+  }
 
   // HUD : chrono
   ctx.fillStyle = 'rgba(8,10,14,0.75)'; roundRect(ctx, W - 96, 12, 84, 30, 8); ctx.fill();
@@ -269,13 +314,15 @@ function draw() {
   ctx.fillStyle = '#fff'; ctx.font = 'bold 15px ui-monospace, monospace'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
   ctx.fillText(`${(t / 1000).toFixed(1)} s`, W - 20, 27);
   // HUD : titre du duel
-  ctx.textAlign = 'left'; ctx.font = 'bold 13px system-ui'; ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.fillText(`${sim.n} × ${props.profile.shortName}  vs  ${props.animal.name}`, 16, 27);
+  ctx.textAlign = 'left'; ctx.font = 'bold 12px system-ui'; ctx.fillStyle = 'rgba(8,10,14,0.7)';
+  const title = `${sim.n} × ${props.profile.shortName}  vs  ${props.animal.name}`;
+  const tw = ctx.measureText(title).width + 20;
+  roundRect(ctx, 12, 12, tw, 26, 8); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillText(title, 22, 25);
 
   // Bannière de fin
   if (sim.banner) {
-    const k = Math.min(1, (t - (sim.elapsed - 0)) / 1 + 1);
-    const bh = 86, by = H / 2 - bh / 2;
+    const bh = 78, by = H - bh - 22;
     ctx.fillStyle = 'rgba(8,10,14,0.85)'; ctx.fillRect(0, by, W, bh);
     const lg = ctx.createLinearGradient(0, by, W, by);
     const col = sim.victory ? '61,214,140' : '229,72,77';
@@ -283,13 +330,12 @@ function draw() {
     ctx.fillStyle = lg; ctx.fillRect(0, by, W, bh);
     ctx.fillStyle = `rgba(${col},0.9)`; ctx.fillRect(0, by, W, 2); ctx.fillRect(0, by + bh - 2, W, 2);
     ctx.textAlign = 'center';
-    ctx.font = '900 30px system-ui'; ctx.fillStyle = sim.victory ? '#5cf0a8' : '#ff5c61';
+    ctx.font = '900 28px system-ui'; ctx.fillStyle = sim.victory ? '#5cf0a8' : '#ff5c61';
     ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 8;
-    ctx.fillText(sim.victory ? 'VICTOIRE HUMAINE' : 'DÉFAITE HUMAINE', W / 2, by + 30);
+    ctx.fillText(sim.victory ? 'VICTOIRE HUMAINE' : 'DÉFAITE HUMAINE', W / 2, by + 28);
     ctx.shadowBlur = 0;
     ctx.font = '500 15px system-ui'; ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillText(sim.banner.replace(/^(Victoire|Défaite) humaine( en \d+ s)? : /, ''), W / 2, by + 60);
-    void k;
+    ctx.fillText(sim.banner.replace(/^(Victoire|Défaite) humaine( en \d+ s)? : /, ''), W / 2, by + 56);
   }
 }
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -315,6 +361,7 @@ onBeforeUnmount(stop);
       <label class="speed">Vitesse
         <select v-model.number="speed"><option :value="0.5">0,5×</option><option :value="1">1×</option><option :value="2">2×</option><option :value="4">4×</option></select>
       </label>
+      <span class="phase" :data-phase="phase">{{ phaseLabel[phase] }}</span>
       <div class="counters">
         <span class="tag ok">🧍 {{ alive }} debout</span>
         <span class="tag warn">🤕 {{ wounded }} blessés</span>
@@ -337,6 +384,10 @@ onBeforeUnmount(stop);
 .speed { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: .9rem; }
 .speed select { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
 .counters { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.phase { font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.phase[data-phase='combat'] { color: var(--accent-2); }
+.phase[data-phase='submersion'] { color: var(--warn); }
+.phase[data-phase='verdict'] { color: var(--ok); }
 .frame { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.04); background: #0d0f14; }
 canvas { width: 100%; height: auto; aspect-ratio: 720 / 440; display: block; }
 .log { list-style: none; padding: 0; margin: 0; font-size: .9rem; color: var(--muted); display: grid; gap: 2px; min-height: 3em; }

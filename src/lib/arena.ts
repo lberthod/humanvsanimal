@@ -31,6 +31,8 @@ export class ArenaSim {
   victory = false;
   banner = '';
   alive = 0; dead = 0; wounded = 0;
+  /** Nombre d'humains actuellement au contact de l'animal. */
+  engaged = 0;
   private outcomes: Status[] = [];
   private nextStrike = 900; private nextShot = 600; private combatStart = -1; private combatTotal = 6000;
   readonly ranged: boolean; readonly knife: boolean; readonly n: number;
@@ -97,6 +99,7 @@ export class ArenaSim {
       }
       h.x = Math.max(26, Math.min(W - 26, h.x)); h.y = Math.max(26, Math.min(H - 26, h.y));
     }
+    this.engaged = engagedCount;
     if (a.dead || this.finished) return;
 
     const targets = list.filter((h) => h.status === 'alive' || h.status === 'light');
@@ -173,6 +176,12 @@ export class ArenaSim {
       ? `Victoire humaine en ${(this.elapsed / 1000).toFixed(0)} s : ${this.dead} mort(s), ${this.wounded} blessé(s).`
       : `Défaite humaine : ${this.dead} mort(s), ${this.wounded} blessé(s), l'animal reste debout.`;
   }
+  get phase(): 'entree' | 'combat' | 'submersion' | 'verdict' {
+    if (this.finished) return 'verdict';
+    if (this.combatStart < 0) return 'entree';
+    return this.outcomes.length > 0 ? 'combat' : 'submersion';
+  }
+  get combatStarted() { return this.combatStart >= 0; }
   /** Vrai quand l'animation peut s'arrêter (petit délai après la fin pour laisser la scène se poser). */
   get done() { return this.finished && this.elapsed > this.finishedAt + 1800; }
 }
